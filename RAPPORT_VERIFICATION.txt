@@ -1,0 +1,42 @@
+LA BOUTIQUE — RAPPORT DE VERIFICATION DU PARCOURS CLIENT
+Date : 17 novembre 2026
+
+1. CONTROLES STATIQUES EFFECTUES
+- Les fichiers HTML principaux sont présents : accueil, boutique, produit, panier, commande, confirmation, suivi, compte et administration.
+- Les liens locaux href/src relevés dans les pages HTML pointent vers des fichiers présents.
+- Les fichiers JavaScript du projet passent la vérification syntaxique Node.js.
+- Le chargement de Supabase est prévu dans app.js : les pages clientes peuvent charger la bibliothèque et js/supabase.js même si elles ne les déclarent pas directement dans leur HTML.
+- Le fichier de configuration contient une clé publishable sb_publishable_, et aucun secret service-role sb_secret_ n'a été trouvé dans l'archive.
+
+2. CORRECTIONS APPLIQUEES DANS CETTE COPIE
+- Suppression d'une deuxième copie inutile des fonctions de gestion des avis dans js/app.js.
+- Protection de l'affichage des noms, descriptions et images des produits contre l'injection de contenu HTML.
+- Vérification du protocole des URL d'images (http/https uniquement).
+- Lecture du panier local plus robuste : un localStorage mal formé ne bloque plus le chargement du site.
+- Normalisation des quantités du panier en nombres entiers positifs.
+
+3. POINTS A VERIFIER AVANT DE DECLARER LE PARCOURS CLIENT VALIDE
+A. Fonction de création de commande
+- commande.html appelle la fonction Supabase RPC public.creer_commande.
+- Le fichier SQL qui crée cette fonction n'est pas présent dans cette archive.
+- Il est donc impossible de confirmer ici sa signature exacte, ses contrôles de stock, sa transaction et les champs retournés (numero_commande, montant_total).
+
+B. Table des avis
+- js/app.js et js/admin.js utilisent la table public.avis avec les colonnes statut, produit_id, nom_client, email_client, note, commentaire et created_at.
+- Le fichier supabase-avis-produits.sql fourni crée plutôt public.avis_produits et ne crée pas la table public.avis.
+- Le fichier supabase-avis-admin.sql suppose que public.avis existe déjà.
+- Il faut confirmer dans Supabase que la table réellement utilisée est bien public.avis et que ses politiques RLS autorisent l'envoi public d'un avis en attente et la modération réservée aux administrateurs. Ne pas exécuter aveuglément les deux scripts comme s'ils décrivaient la même table.
+
+C. Tests qui nécessitent le vrai projet Supabase
+- Création d'une commande avec un produit actif et un stock suffisant.
+- Vérification de la création du client, de la commande et des lignes de commande.
+- Vérification de la diminution du stock et de la notification administrateur.
+- Vérification de la page de confirmation et du suivi avec le bon numéro + e-mail.
+- Vérification du refus avec un numéro ou un e-mail incorrect.
+- Vérification de l'envoi d'e-mail après configuration des secrets Supabase/Resend.
+
+4. LIMITES
+Cette vérification porte sur les fichiers fournis. Elle ne simule pas une vraie commande et ne se connecte pas à votre projet Supabase. La validation finale du parcours dépend des fonctions SQL, des données et des politiques RLS actuellement installées dans votre projet.
+
+5. PAIEMENT
+Le code indique que le paiement à la livraison est enregistré. Le choix Mobile Money est présenté comme « à confirmer » : aucun traitement automatique de paiement Mobile Money n'est démontré par les fichiers fournis.
