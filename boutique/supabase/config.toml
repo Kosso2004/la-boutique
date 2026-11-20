@@ -1,0 +1,2 @@
+[functions.email-commande]
+verify_jwt = false

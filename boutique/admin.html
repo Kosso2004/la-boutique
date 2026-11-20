@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - La Boutique</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f1eb;
+            color: #29251f;
+        }
+
+        header {
+            background: #29251f;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header button {
+            background: #c69b65;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .admin-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notifications-control {
+            position: relative;
+        }
+
+        #notificationsBell {
+            position: relative;
+            background: transparent;
+            padding: 6px 10px;
+            font-size: 20px;
+        }
+
+        #notificationsBadge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            padding: 1px 5px;
+            border-radius: 10px;
+            background: #a83232;
+            color: white;
+            font-size: 11px;
+            line-height: 16px;
+        }
+
+        .notifications-panel {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            z-index: 1100;
+            width: min(420px, calc(100vw - 24px));
+            max-height: min(70vh, 560px);
+            overflow-y: auto;
+            padding: 18px;
+            border: 1px solid #e6dfd6;
+            border-radius: 8px;
+            background: #fff;
+            color: #29251f;
+            box-shadow: 0 10px 30px #0002;
+        }
+
+        .notifications-panel[hidden] {
+            display: none;
+        }
+
+        .notifications-panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .notifications-panel-heading h3 {
+            margin: 0;
+        }
+
+        .notifications-panel-heading button {
+            padding: 6px 10px;
+        }
+
+        #notificationsPanelListe .notification-item {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        main {
+            padding: 25px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0001;
+        }
+
+        .stat-card h3 {
+            color: #777;
+            font-size: 15px;
+        }
+
+        .stat-card p {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .section {
+            background: white;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f1eb;
+        }
+
+        @media (max-width: 600px) {
+                    header {
+                        align-items: flex-start;
+                        flex-direction: column;
+                        gap: 12px;
+                        padding: 14px 12px;
+                    }
+
+                    header h2 {
+                        margin: 0;
+                        font-size: 18px;
+                    }
+
+                    .admin-header-actions {
+                        width: 100%;
+                        justify-content: space-between;
+                    }
+
+            main {
+                padding: 12px;
+            }
+
+            .section {
+                overflow-x: auto;
+            }
+
+                    .stats {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 10px;
+                    }
+
+                    .stat-card {
+                        padding: 14px;
+                    }
+
+                    .stat-card h3 {
+                        min-height: 36px;
+                        font-size: 13px;
+                    }
+
+                    .stat-card p {
+                        font-size: 21px;
+                    }
+
+                    .popup-content {
+                        max-height: 94vh;
+                        padding: 18px;
+                    }
+
+                    .popup-header {
+                        gap: 10px;
+                    }
+
+                    .popup-actions {
+                        align-items: stretch;
+                        flex-direction: column-reverse;
+                    }
+
+                    .popup-actions button {
+                        width: 100%;
+                    }
+
+                    table {
+                        min-width: 620px;
+                    }
+
+                    #graphiqueVentes {
+                        min-height: 220px;
+                    }
+        }
+        
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.products-header p,
+.popup-header p {
+    color: #888;
+    margin-top: 5px;
+}
+
+.btn-ajouter, .btn-enregistrer {
+    background: #29251f;
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+}
+
+.popup-overlay.active {
+    display: flex;
+}
+
+.popup-content {
+    background: white;
+    width: 100%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+    border-radius: 14px;
+    box-shadow: 0 10px 40px #0003;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.btn-fermer {
+    border: none;
+    background: #f1eee9;
+    font-size: 25px;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.champ {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.champ label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.champ input, .champ select, .champ textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.champ textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.champ-complet {
+    grid-column: 1 / -1;
+}
+
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.btn-annuler {
+    background: #eee;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.notifications-heading,
+.notification-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.notification-item {
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-item p {
+    margin: 4px 0;
+}
+
+.notification-item small {
+    color: #777;
+}
+
+.notification-unread {
+    border-left: 3px solid #c69b65;
+    padding-left: 12px;
+}
+
+.notification-item button,
+#rafraichirNotifications {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .notification-item,
+    .notifications-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .champ-complet {
+        grid-column: auto;
+    }
+
+    .products-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>La Boutique - Administration</h2>
+    <div class="admin-header-actions">
+        <div class="notifications-control">
+            <button type="button" id="notificationsBell" aria-label="Notifications non lues"
+                    aria-controls="notificationsPanel" aria-expanded="false">
+                🔔<span id="notificationsBadge" hidden>0</span>
+            </button>
+            <section id="notificationsPanel" class="notifications-panel" hidden
+                     role="region" aria-label="Panneau des notifications">
+                <div class="notifications-panel-heading">
+                    <h3>Notifications</h3>
+                    <button type="button" id="fermerNotifications">Fermer</button>
+                </div>
+                <div id="notificationsPanelListe">
+                    <p>Chargement des notifications...</p>
+                </div>
+            </section>
+        </div>
+        <button id="logoutBtn">Déconnexion</button>
+    </div>
+</header>
+
+<main>
+    <h1>Tableau de bord</h1>
+    <p>Bienvenue dans votre espace d'administration.</p>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Produits</h3>
+            <p id="totalProduits">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Produits en stock faible</h3>
+            <p id="produitsStockFaible">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Commandes</h3>
+            <p id="totalCommandes">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Clients</h3>
+            <p id="totalClients">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Chiffre d'affaires</h3>
+            <p id="chiffreAffaires">0 FCFA</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Commandes en attente</h3>
+            <p id="commandesAttente">0</p>
+        </div>
+    </div>
+
+    <div class="section" id="notificationsSection">
+        <div class="notifications-heading">
+            <div>
+                <h2>Notifications</h2>
+                <p id="notificationsNonLues" class="muted">Chargement...</p>
+            </div>
+            <button type="button" id="rafraichirNotifications">Actualiser</button>
+        </div>
+        <div id="notificationsListe" aria-live="polite">
+            <p class="muted">Chargement des notifications...</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Produits à réapprovisionner</h2>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th>Stock restant</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="listeProduitsStockFaible">
+                    <tr><td colspan="3">Chargement des produits...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Historique des mouvements de stock</h2>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Produit</th>
+                        <th>Mouvement</th>
+                        <th>Quantité</th>
+                        <th>Stock avant</th>
+                        <th>Stock après</th>
+                    </tr>
+                </thead>
+                <tbody id="historiqueStock">
+                    <tr><td colspan="6">Chargement de l'historique...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Ventes des 7 derniers jours</h2>
+        <select id="periodeVentes">
+            <option value="jour">Aujourd'hui</option>
+            <option value="semaine" selected>Cette semaine</option>
+            <option value="mois">Ce mois-ci</option>
+            <option value="annee">Cette année</option>
+        </select>
+        <canvas id="graphiqueVentes" aria-label="Graphique des ventes sur les 7 derniers jours"></canvas>
+    </div>
+
+<div class="section">
+    
+<div class="section products-section">
+    <div class="products-header">
+        <div>
+            <h2>Mes produits</h2>
+            <p>Gérez votre catalogue de produits.</p>
+        </div>
+
+        <button type="button" id="ouvrirPopup" class="btn-ajouter">
+            + Ajouter un produit
+        </button>
+    </div>
+
+    <!-- FENÊTRE POPUP -->
+    <div id="popupProduit" class="popup-overlay">
+        <div class="popup-content">
+
+            <div class="popup-header">
+                <div>
+                    <h2 id="formTitre">Ajouter un produit</h2>
+                    <p>Renseignez les informations du produit.</p>
+                </div>
+                <button type="button" id="fermerPopup" class="btn-fermer">×</button>
+            </div>
+
+            <form id="produitForm">
+                <input type="hidden" id="produitId">
+
+                <div class="form-grid">
+                    <div class="champ">
+                        <label>Nom du produit</label>
+                        <input type="text" id="nomProduit"
+                               placeholder="Ex : Vase décoratif" required>
+                    </div>
+
+                    <div class="champ">
+                        <label>Catégorie</label>
+                        <select id="categorieProduit" required>
+                            <option value="">Choisir une catégorie</option>
+                            <option value="deco">Décoration</option>
+                            <option value="mobilier">Mobilier</option>
+                            <option value="linge">Linge</option>
+                        </select>
+                    </div>
+
+                    <div class="champ">
+                        <label>Prix (FCFA)</label>
+                        <input type="number" id="prixProduit"
+                               min="0" placeholder="Ex : 15000" required>
+                    </div>
+
+                    <div class="champ">
+                        <label>Stock disponible</label>
+                        <input type="number" id="stockProduit"
+                               min="0" placeholder="Quantité" required>
+                    </div>
+
+                    <div class="champ champ-complet">
+                        <label>Description</label>
+                        <textarea id="descriptionProduit"
+                                  placeholder="Décrivez le produit..."></textarea>
+                    </div>
+
+                    <div class="champ champ-complet">
+                        <label>URL de l'image</label>
+                        <input type="url" id="imageProduit"
+                               placeholder="https://...">
+                    </div>
+                </div>
+
+                <p id="messageProduit"></p>
+
+                <div class="popup-actions">
+                    <button type="button" id="annulerModification"
+                            class="btn-annuler">
+                        Annuler
+                    </button>
+
+                    <button type="submit" id="btnProduit" class="btn-enregistrer">
+                        Enregistrer le produit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- LISTE DES PRODUITS -->
+    <h3>Liste des produits</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="listeProduits">
+            <tr>
+                <td colspan="5">Chargement des produits...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+    <div class="section">
+        <h2>Toutes les commandes</h2>
+        <p>Consultez les achats et suivez leur évolution.</p>
+
+        <button type="button" id="exporterPDF">
+            Télécharger les commandes en PDF
+        </button>
+
+        <div style="display:flex; flex-wrap:wrap; gap:12px; margin:16px 0;">
+            <label>
+                Rechercher une commande ou un client
+                <input type="search" id="rechercheCommandes" placeholder="N° commande ou nom du client">
+            </label>
+            <label>
+                Filtrer par statut
+                <select id="filtreStatutCommandes">
+                    <option value="tous">Tous les statuts</option>
+                    <option value="attente">En attente</option>
+                    <option value="validee">Validée</option>
+                    <option value="expediee">Expédiée</option>
+                    <option value="annulee">Annulée</option>
+                </select>
+            </label>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>N° commande</th>
+                        <th>Client</th>
+                        <th>Montant</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="toutesCommandes">
+                    <tr>
+                        <td colspan="6">Chargement des commandes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Gestion des avis clients</h2>
+        <p>Consultez les avis envoyés et validez ceux qui seront publiés.</p>
+
+        <label>
+            Filtrer les avis
+            <select id="filtreStatutAvis">
+                <option value="tous">Tous les avis</option>
+                <option value="en attente">En attente</option>
+                <option value="approuvé">Approuvés</option>
+                <option value="refusé">Refusés</option>
+            </select>
+        </label>
+
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Produit</th>
+                        <th>Client</th>
+                        <th>Note</th>
+                        <th>Commentaire</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="listeAvisClients">
+                    <tr><td colspan="7">Chargement des avis...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- FENÊTRE DÉTAILS COMMANDE -->
+    <div id="popupCommande" class="popup-overlay">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h2>Détails de la commande</h2>
+                <button type="button" id="fermerCommande" class="btn-fermer">×</button>
+            </div>
+            <div id="detailsCommande">Chargement...</div>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="js/admin.js"></script>
+
+</body>
+</html>

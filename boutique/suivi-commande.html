@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivre une commande — La Boutique</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <a class="logo" href="index.html">La Boutique<span>.</span></a>
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="boutique.html">La boutique</a>
+            <a class="active" href="suivi-commande.html">Suivre une commande</a>
+        </nav>
+        <div class="header-actions">
+            <a href="compte.html">Compte</a>
+            <a href="panier.html">Panier</a>
+        </div>
+        <button class="menu-toggle" aria-label="Menu">☰</button>
+    </header>
+
+    <main class="page narrow">
+        <p class="eyebrow">SUIVI DE COMMANDE</p>
+        <h1>Où en est votre commande ?</h1>
+        <p class="muted">Saisissez le numéro de commande et l’adresse e-mail utilisés lors de l’achat.</p>
+
+        <form id="tracking-form" class="panel tracking-form">
+            <label>
+                Numéro de commande
+                <input type="text" name="numero_commande" id="numero-commande" required autocomplete="off" placeholder="Ex. LB-123456">
+            </label>
+            <label>
+                Adresse e-mail de la commande
+                <input type="email" name="email" required autocomplete="email" placeholder="vous@exemple.com">
+            </label>
+            <button type="submit" class="btn">Rechercher ma commande</button>
+            <p id="tracking-message" class="muted tiny" role="status" aria-live="polite"></p>
+        </form>
+
+        <section id="tracking-result" class="panel tracking-result" hidden aria-live="polite"></section>
+    </main>
+
+    <footer>
+        <a class="logo" href="index.html">La Boutique<span>.</span></a>
+        <small>© 2026 La Boutique.</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/suivi-commande.js"></script>
+</body>
+</html>
